@@ -122,7 +122,7 @@ def validate_tracks_batch(track_ids: List[str]) -> Dict[str, Dict[str, Any]]:
                     "name": track_info["name"],
                 }
         except Exception:
-            # Si hay error (404, 401, etc.), simplemente no agregamos el track
+            # Si hay error (404, 500, etc.), simplemente no agregamos el track
             continue
     return valid_tracks
 
@@ -142,7 +142,7 @@ def validate_artists_batch(artist_ids: List[str]) -> Dict[str, Dict[str, Any]]:
                     "name": artist_info["name"],
                 }
         except Exception:
-            # Si hay error (404, 401, etc.), simplemente no agregamos el artista        
+            # Si hay error (404, 500, etc.), simplemente no agregamos el artista        
             continue
     return valid_artists
 

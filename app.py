@@ -22,7 +22,7 @@ from storage import (
 def create_app():
     app = Flask(__name__)
     
-    # Inicializar MySQL
+    # Inicializar la conexión a MySQL al crear la aplicación
     init_mysql(app)
 
     @app.route("/health", methods=["GET"])
@@ -33,15 +33,15 @@ def create_app():
     # --- Manejo de errores ---
 
     @app.errorhandler(404)
-    def handle_404(error):  # noqa: ARG001
+    def handle_404(error):  
         return jsonify({"data": None, "error": "Not found"}), 404
 
     @app.errorhandler(400)
-    def handle_400(error):  # noqa: ARG001
+    def handle_400(error): 
         return jsonify({"data": None, "error": "Bad request"}), 400
 
     @app.errorhandler(500)
-    def handle_500(error):  # noqa: ARG001
+    def handle_500(error): 
         return jsonify({"data": None, "error": "Internal server error"}), 500
 
     # --- Rutas CRUD de usuarios ---
@@ -174,6 +174,7 @@ def create_app():
     def put_user_music_prefs(user_id: int):
         payload = request.get_json() or {}
 
+        # Extraer los arrays de IDs y géneros del payload
         ids_canciones_favoritas = payload.get("ids_canciones_favoritas", [])
         ids_artistas_favoritos = payload.get("ids_artistas_favoritos", [])
         generos = payload.get("generos", [])
@@ -197,11 +198,14 @@ def create_app():
             extracted = []
             for item in items:
                 if isinstance(item, str):
+                    # Si es un string, usarlo directamente como ID
                     extracted.append(item)
                 elif isinstance(item, dict) and "id" in item:
+                    # Si es un objeto con campo "id", extraer ese campo
                     extracted.append(item["id"])
             return extracted
 
+        # Extraer los IDs limpios de canciones y artistas
         track_ids = extract_ids(ids_canciones_favoritas)
         artist_ids = extract_ids(ids_artistas_favoritos)
 
@@ -209,11 +213,14 @@ def create_app():
         warnings = {"invalid_track_ids": [], "invalid_artist_ids": []}
         
         try:
+            # Obtener tracks y artistas validos
             valid_tracks = validate_tracks_batch(track_ids)
             valid_artists = validate_artists_batch(artist_ids)
         except SpotifyAuthError as exc:
+            # Error de autenticación con Spotify (credenciales inválidas o faltantes)
             return jsonify({"data": None, "error": str(exc)}), 502
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc: 
+            # Otros errores al comunicarse con Spotify 
             return jsonify({"data": None, "error": f"Error validando con Spotify: {str(exc)}"}), 502
 
         # Identificar IDs inválidos
@@ -227,6 +234,8 @@ def create_app():
         validated_tracks = [valid_tracks[tid]["name"] for tid in track_ids if tid in valid_track_ids]
         validated_artists = [valid_artists[aid]["name"] for aid in artist_ids if aid in valid_artist_ids]
 
+        # Preparar datos para guardar en la base de datos
+        # Los géneros no se validan, se guardan tal cual
         prefs_data = {
             "canciones_favoritas": validated_tracks,
             "artistas_favoritos": validated_artists,
@@ -271,7 +280,8 @@ def create_app():
         updated = upsert_music_prefs_for_user(user_id, merged)
         return jsonify({"data": updated, "error": None}), 200
 
-    # info básica de canciones y artistas
+    # --- Integración con Spotify API ---
+    # Endpoints que consultan información directamente desde Spotify
 
     @app.route("/spotify/tracks/<string:track_id>", methods=["GET"])
     def spotify_track_info(track_id: str):
@@ -279,7 +289,7 @@ def create_app():
             info = get_track_info(track_id)
         except SpotifyAuthError as exc:
             return jsonify({"data": None, "error": str(exc)}), 500
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return jsonify({"data": None, "error": str(exc)}), 502
 
         if not info:
@@ -292,7 +302,7 @@ def create_app():
             info = get_artist_info(artist_id)
         except SpotifyAuthError as exc:
             return jsonify({"data": None, "error": str(exc)}), 500
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return jsonify({"data": None, "error": str(exc)}), 502
 
         if not info:
