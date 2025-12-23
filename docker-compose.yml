@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: flask_api_mysql
+    container_name: django_api_mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
@@ -23,7 +23,7 @@ services:
 
   web:
     build: .
-    container_name: flask_api_web
+    container_name: django_api_web
     restart: always
     ports:
       - "5000:5000"
@@ -34,14 +34,14 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-flask_api_db}
       SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      DEBUG: ${DEBUG:-True}
+      SECRET_KEY: ${SECRET_KEY:-secret_key}
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
-    command: python app.py
+    command: python manage.py runserver 0.0.0.0:5000
 
 volumes:
   mysql_data:
-
-

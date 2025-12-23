@@ -1,13 +1,13 @@
-# Flask-REST-API
+# Django-REST-API
 
-API RESTful en Flask para gestionar usuarios, sus preferencias musicales (almacenadas en MySQL) e integrar información básica de canciones y artistas desde la API oficial de Spotify.
+API RESTful en Django para gestionar usuarios, sus preferencias musicales (almacenadas en MySQL) e integrar información básica de canciones y artistas desde la API oficial de Spotify.
 
 
 ## Tecnologías Utilizadas
 
-- **Backend**: Flask 3.0.0
+- **Backend**: Django 4.2.8
 - **Base de Datos**: MySQL 8.0
-- **ORM/Driver**: PyMySQL 1.1.0
+- **ORM/Driver**: mysqlclient 2.2.0
 - **HTTP Client**: requests 2.32.3
 - **Configuración**: python-dotenv 1.0.1
 - **Contenedores**: Docker & Docker Compose
@@ -16,10 +16,17 @@ API RESTful en Flask para gestionar usuarios, sus preferencias musicales (almace
 ## Estructura del Proyecto
 
 ```
-Flask-REST-API/
-├── app.py                 # Aplicación Flask principal con todas las rutas
-├── storage.py             # Funciones de acceso a la base de datos MySQL
-├── spotify_client.py      # Cliente para interactuar con la API de Spotify
+Django-REST-API/
+├── manage.py              # Script de gestión de Django
+├── config/                # Proyecto Django (configuración)
+│   ├── __init__.py
+│   ├── settings.py        # Configuración de Django
+│   └──  urls.py            # Rutas de la API
+├── apiView/               # App principal de la API
+│   ├── __init__.py
+│   ├── models.py          # Modelos User y MusicPrefs
+│   ├── views.py           # Vistas con JsonResponse
+│   └── spotify_client.py  # Cliente para interactuar con la API de Spotify
 ├── init.sql               # Script de inicialización de la base de datos
 ├── requirements.txt       # Dependencias del proyecto
 ├── Dockerfile             # Configuración de la imagen Docker
@@ -57,8 +64,8 @@ SPOTIFY_CLIENT_SECRET=tu_client_secret_aqui
 docker-compose up -d
 ```
 
-Esto construirá la imagen de la aplicación Flask y levantará los servicios:
-- **web**: Aplicación Flask (puerto 5000)
+Esto construirá la imagen de la aplicación Django y levantará los servicios:
+- **web**: Aplicación Django (puerto 5000)
 - **db**: Base de datos MySQL 8.0 (puerto 3306)
 
 ### 3. Verificar que los servicios estén corriendo
@@ -398,4 +405,3 @@ Todas las respuestas de la API (excepto `/health`) siguen un formato JSON:
 ## Persistencia de Datos
 
 Los datos se persisten automáticamente en volúmenes de Docker. El volumen `mysql_data` almacena los datos de MySQL y persiste incluso si eliminas los contenedores (a menos que uses `docker-compose down -v`).
-

@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instalar dependencias del sistema si son necesarias
+# Instalar dependencias del sistema para mysqlclient
 RUN apt-get update && apt-get install -y \
     gcc \
     default-libmysqlclient-dev \
@@ -19,7 +19,5 @@ COPY . .
 # Exponer el puerto 5000
 EXPOSE 5000
 
-# Comando para ejecutar la aplicación
-CMD ["python", "app.py"]
-
-
+# Comando para ejecutar Django con runserver
+CMD ["python", "manage.py", "runserver", "0.0.0.0:5000"]
